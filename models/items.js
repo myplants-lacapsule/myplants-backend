@@ -5,12 +5,13 @@ const itemsSchema = mongoose.Schema({
     isPlant: { type: Boolean, default: true },
     title: String,
     description: String,
-    photo: String,
+    photo: [String],
     price: { type: Boolean, default: 0 },
-    height: { type: Boolean, default: 0 },
+    height: { type: Number, default: 0 },
     condition: String,
     token: String,
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "users" },
+    createdAt: Date,
 });
 
 const Item = mongoose.model("items", itemsSchema);
