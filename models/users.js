@@ -1,17 +1,16 @@
 const mongoose = require('mongoose');
 
 const usersSchema = mongoose.Schema({
-    firstname: String,
-    lastname: String,
     username: String,
+    email: String,
     password: String,
-    phone: String,
+    phone: { type: String, default: null },
     token: String,
     address: {
-        street: String,
-        city: String,
-        postalCode: String,
-        country: String,
+        street: { type: String, default: null },
+        city: { type: String, default: null },
+        postalCode: { type: String, default: null },
+        country: { type: String, default: null },
         location: { long: String, lat: String },
     }
 });
