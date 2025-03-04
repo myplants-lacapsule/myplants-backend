@@ -69,8 +69,8 @@ router.get('/:userToken', async (req, res) => {
             return res.status(404).json({ result: false, error: 'User not found' });
         }
 
-        const plants = await Plant.find({ user: user._id })
-        if (!plants.length === 0) {
+        const plants = await Plant.find({ user: user._id }).select('-user')
+        if (plants.length === 0) {
             return res.status(404).json({ result: false, error: 'No plant not found' });
         }
 
