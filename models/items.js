@@ -6,7 +6,7 @@ const itemsSchema = mongoose.Schema({
     title: String,
     description: String,
     photo: [String],
-    price: { type: Boolean, default: 0 },
+    price: { type: Number, default: 0 },
     height: { type: Number, default: 0 },
     condition: String,
     token: String,
