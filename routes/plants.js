@@ -51,7 +51,7 @@ router.post('/newPlant/:userToken', async (req, res) => {
         });
 
         const savedPlant = await newPlant.save();
-        
+
         res.json({ result: true, data: savedPlant });
 
     } catch (error) {
@@ -60,5 +60,26 @@ router.post('/newPlant/:userToken', async (req, res) => {
     }
 });
 
+
+// route get pour récupérer toutes les plantes d'un user
+router.get('/:userToken', async (req, res) => {
+    try {
+        const user = await User.findOne({ token: req.params.userToken })
+        if (!user) {
+            return res.status(404).json({ result: false, error: 'User not found' });
+        }
+
+        const plants = await Plant.find({ user: user._id })
+        if (!plants.length === 0) {
+            return res.status(404).json({ result: false, error: 'Not plant not found' });
+        }
+
+        res.json({ result: true, data: plants })
+
+    } catch (error) {
+        console.error('Error creating new plant:', error);
+        res.status(500).json({ result: false, error: 'Internal Server Error' });
+    }
+})
 
 module.exports = router;
