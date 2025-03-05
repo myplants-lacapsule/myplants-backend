@@ -11,8 +11,9 @@ const usersSchema = mongoose.Schema({
         city: { type: String, default: null },
         postalCode: { type: String, default: null },
         country: { type: String, default: null },
-        location: { long: String, lat: String },
-    }
+        long: { type: String, default: null },
+        lat: { type: String, default: null },
+    },
 });
 
 const User = mongoose.model('users', usersSchema);
