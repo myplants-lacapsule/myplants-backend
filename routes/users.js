@@ -101,7 +101,7 @@ router.post("/updateLocation", async (req, res) => {
       const data = await response.json();
 
       if (data.features && data.features.length > 0) {
-        const [longitude, latitude] = data.features[0].geometry.coordinates;
+        [longitude, latitude] = data.features[0].geometry.coordinates;
       }
 
     
@@ -113,7 +113,7 @@ router.post("/updateLocation", async (req, res) => {
     user.address = {
       street : street,
       city : city,
-      postalCode : postalCode,
+      postalCode : Number(postalCode),
       lat: latitude,
       long: longitude,
   
