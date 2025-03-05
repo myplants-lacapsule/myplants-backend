@@ -24,7 +24,14 @@ router.post("/signup", (req, res) => {
         password: hash,
         token: uid2(32),
         phone: req.body.phone,
-        
+        address: {
+          street: req.body.street,
+          city: req.body.city,
+          postalCode: req.body.postalCode,
+          country: req.body.country,
+          long: req.body.long,
+          lat: req.body.lat,
+        }
       });
 
       newUser.save().then((newDoc) => {
