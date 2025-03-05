@@ -27,9 +27,9 @@ router.post('/upload', async (req, res) => {
 router.post('/newPlant/:userToken', async (req, res) => {
     try {
         // Vérification des champs requis
-        if (!req.body.name || !req.body.description || !req.body.wateringFrequency || !req.body.problems || !req.body.toxicity || !req.body.seasonality || !req.body.sunExposure || !req.body.photo) {
-            return res.json({ result: false, error: "champs manquants" })
-        }
+        // if (!req.body.name || !req.body.description || !req.body.wateringFrequency || !req.body.cuisine || !req.body.toxicity || !req.body.seasonality || !req.body.sunExposure || !req.body.photo) {
+        //     return res.json({ result: false, error: "champs manquants" })
+        // }
 
         // Recherche de l'utilisateur par token
         const user = await User.findOne({ token: req.params.userToken });
@@ -42,7 +42,7 @@ router.post('/newPlant/:userToken', async (req, res) => {
             name: req.body.name,
             description: req.body.description,
             wateringFrequency: req.body.wateringFrequency,
-            problems: req.body.problems,
+            cuisine: req.body.cuisine,
             toxicity: req.body.toxicity,
             seasonality: req.body.seasonality,
             sunExposure: req.body.sunExposure,
