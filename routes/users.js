@@ -52,5 +52,70 @@ router.post("/signin", (req, res) => {
 });
 
 
+router.post("/getUserLocation", async (req, res) => {
+  try {
+   const token = req.body.token;
+    if (!token) {
+      return res.json({ result: false, error: "Token is required" });
+    }
+
+    const user = await User.findOne({ token });
+    if (!user) {
+      return res.json({ result: false, error: "User not found" });
+    }
+
+    // Supposons que l'adresse de l'utilisateur est stockée dans user.address.location
+    res.json({
+      result: true,
+      latitude: user.address.location.lat || null,
+      longitude: user.address.location.long || null,
+    });
+  } catch (error) {
+    res.status(500).json({ result: false, error: error.message });
+  }
+});
+
+router.post("/updateLocation", async (req, res) => {
+  try {
+    const { token, street, city, postalCode } = req.body;
+    if (!token || !street || !city || !postalCode) {
+      return res.json({ result: false, error: "Missing required fields" });
+    }
+
+      const response = await fetch(`https://api-adresse.data.gouv.fr/search/?q=${address}&postcode=${postalCode}&limit=1`);
+      if (!response.ok) {
+        throw new Error("Erreur lors du géocodage");
+      }
+      const data = await response.json();
+
+      if (data.features && data.features.length > 0) {
+        const [longitude, latitude] = data.features[0].geometry.coordinates;
+        return { latitude, longitude };
+      }
+
+    
+    const user = await User.findOne({ token });
+    if (!user) {
+      return res.json({ result: false, error: "User not found" });
+    }
+
+    user.address = {
+      street,
+      city,
+      postalCode,
+      location: {
+        lat: latitude,
+        long: longitude,
+      },
+    };
+
+    await user.save();
+    res.json({ result: true });
+  } catch (error) {
+    res.status(500).json({ result: false, error: error.message });
+  }
+});
+
+
 module.exports = router;
 
