@@ -62,4 +62,15 @@ router.post("/newItem/:userToken", async (req, res) => {
     })
 ;
 
+// Route pour récupérer tous les items avec leur user associé
+router.get("/allItems", async (req, res) => {
+  try {
+    const items = await Item.find().populate("createdBy");
+    res.json({ result: true, items });
+  } catch (error) {
+    res.status(500).json({ result: false, error: error.message });
+  }
+});
+
+
 module.exports = router;
