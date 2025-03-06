@@ -4,6 +4,7 @@ var router = express.Router();
 const uniqid = require('uniqid')
 const cloudinary = require('cloudinary').v2;
 const fs = require('fs');
+const uid2 = require("uid2");
 
 const User = require("../models/users");
 const Plant = require("../models/plants")
@@ -47,6 +48,7 @@ router.post('/newPlant/:userToken', async (req, res) => {
             seasonality: req.body.seasonality,
             sunExposure: req.body.sunExposure,
             photo: req.body.photo,
+            token: uid2(32),
             user: user._id,
         });
 
@@ -69,8 +71,8 @@ router.get('/:userToken', async (req, res) => {
             return res.status(404).json({ result: false, error: 'User not found' });
         }
 
-        const plants = await Plant.find({ user: user._id }).select('-user')
-        
+        const plants = await Plant.find({ user: user._id }).select('-user -_id')
+
         if (plants.length === 0) {
             return res.json({ result: false, error: 'No plant found' });
         }
@@ -79,6 +81,24 @@ router.get('/:userToken', async (req, res) => {
 
     } catch (error) {
         console.error('Error creating new plant:', error);
+        res.status(500).json({ result: false, error: 'Internal Server Error' });
+    }
+})
+
+// route pour delete une plante
+router.delete('/deletePlant/:plantToken', async (req, res) => {
+
+    try {
+        const plantDeleted = await Plant.deleteOne({token : req.params.plantToken})
+
+        if (plantDeleted.deletedCount === 1){
+            res.json({result : true, info: "plant deleted"})
+        } else{
+            res.json({ result : false, error: "plant not deleted"})
+        }
+
+    } catch (error) {
+        console.error('Error deleting a plant:', error);
         res.status(500).json({ result: false, error: 'Internal Server Error' });
     }
 })
