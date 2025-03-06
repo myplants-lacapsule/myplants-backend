@@ -9,6 +9,7 @@ const plantsSchema = mongoose.Schema({
   seasonality: String,
   sunExposure: String,
   photo: String,
+  token: String,
   user: { type: mongoose.Schema.Types.ObjectId, ref: "users" },
 });
 
