@@ -48,6 +48,7 @@ router.post('/newPlant/:userToken', async (req, res) => {
             seasonality: req.body.seasonality,
             sunExposure: req.body.sunExposure,
             photo: req.body.photo,
+            lastWatering: Date.now(),
             token: uid2(32),
             user: user._id,
         });

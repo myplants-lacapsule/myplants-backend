@@ -4,6 +4,7 @@ const plantsSchema = mongoose.Schema({
   name: String,
   description: String,
   wateringFrequency: Number,
+  lastWatering: Date,
   cuisine: String,
   toxicity: String,
   seasonality: String,
