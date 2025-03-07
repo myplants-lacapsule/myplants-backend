@@ -15,7 +15,6 @@ router.post("/signup", (req, res) => {
 
   // Check if the user has not already been registered
   User.findOne({ email: req.body.email }).then((data) => {
-    console.log(req.body);
     
     if (data === null) {
       const hash = bcrypt.hashSync(req.body.password, 10);
@@ -27,12 +26,12 @@ router.post("/signup", (req, res) => {
         token: uid2(32),
         phone: req.body.phone,
         address: {
-          street: req.body.address.street,
-          city: req.body.address.city,
-          postalCode: req.body.address.postalCode,
-          country: req.body.address.country,
-          long: req.body.address.long,
-          lat: req.body.address.lat,
+          street: null,
+          city: null,
+          postalCode: null,
+          country: null,
+          long: null,
+          lat: null
         }
       });
 

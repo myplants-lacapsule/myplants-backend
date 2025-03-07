@@ -62,6 +62,11 @@ router.post("/newItem/:userToken", async (req, res) => {
 router.get("/allItems", async (req, res) => {
   try {
     const items = await Item.find().populate("createdBy", "token address -_id");
+
+    if (items.length === 0 ){
+      res.json({result: false, items: "no items found"})
+    }
+    
     res.json({ result: true, items });
   } catch (error) {
     res.status(500).json({ result: false, error: error.message });
