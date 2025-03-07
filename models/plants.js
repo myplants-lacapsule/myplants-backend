@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const plantsSchema = mongoose.Schema({
   name: String,
   description: String,
-  wateringFrequency: String,
+  wateringFrequency: Number,
   cuisine: String,
   toxicity: String,
   seasonality: String,
