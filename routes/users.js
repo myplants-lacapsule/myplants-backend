@@ -15,7 +15,7 @@ router.post("/signup", (req, res) => {
 
   // Check if the user has not already been registered
   User.findOne({ email: req.body.email }).then((data) => {
-    
+
     if (data === null) {
       const hash = bcrypt.hashSync(req.body.password, 10);
 
@@ -60,16 +60,43 @@ router.post("/signin", (req, res) => {
   });
 });
 
+router.put('/logout/:userToken', async (req, res) => {
+
+  try {
+    const token = req.params.userToken
+    if (!token) {
+      return res.json({ result: false, error: "Token is required" })
+    }
+
+    const userFound = await User.findOne({ token: token })
+    console.log(userFound)
+
+    const modifyToken = await User.updateOne({ _id: userFound._id}, {token: null })
+
+    console.log(modifyToken)
+
+    if (modifyToken.modifiedCount === 1) {
+      res.json({ result: true, info: "token user deleted" })
+    } else {
+      res.json({ result: false })
+
+    }
+    // console.log("response ", response)
+  } catch (error) {
+    res.status(500).json({ result: false, error: error.message });
+  }
+})
+
 
 router.get("/getUserLocation/:userToken", async (req, res) => {
   try {
-   const token = req.params.userToken;
+    const token = req.params.userToken;
     if (!token) {
       return res.json({ result: false, error: "Token is required" });
     }
 
     const user = await User.findOne({ token: token }).select("-password -_id -username -email -phone");
-    
+
     const populated = await user.populate("address");
 
     if (!user) {
@@ -90,32 +117,32 @@ router.post("/updateLocation", async (req, res) => {
   try {
     const { token, street, city, postalCode } = req.body;
     if (!token || !street || !city || !postalCode) {
-       return res.json({ result: false, error: "Missing required fields" });
-     }
+      return res.json({ result: false, error: "Missing required fields" });
+    }
 
-      const response = await fetch(`https://api-adresse.data.gouv.fr/search/?q=${street}&postcode=${postalCode}&limit=1`);
-      if (!response.ok) {
-        throw new Error("Erreur lors du géocodage");
-      }
-      const data = await response.json();
+    const response = await fetch(`https://api-adresse.data.gouv.fr/search/?q=${street}&postcode=${postalCode}&limit=1`);
+    if (!response.ok) {
+      throw new Error("Erreur lors du géocodage");
+    }
+    const data = await response.json();
 
-      if (data.features && data.features.length > 0) {
-        [longitude, latitude] = data.features[0].geometry.coordinates;
-      }
+    if (data.features && data.features.length > 0) {
+      [longitude, latitude] = data.features[0].geometry.coordinates;
+    }
 
-    
+
     const user = await User.findOne({ token });
     if (!user) {
       return res.json({ result: false, error: "User not found" });
     }
 
     user.address = {
-      street : street,
-      city : city,
-      postalCode : Number(postalCode),
+      street: street,
+      city: city,
+      postalCode: Number(postalCode),
       lat: latitude,
       long: longitude,
-  
+
     };
 
     await user.save();
