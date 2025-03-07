@@ -77,8 +77,6 @@ router.get("/getUserLocation/:userToken", async (req, res) => {
       return res.json({ result: false, error: "User not found" });
     }
 
-    console.log("user address", populated)
-
     res.json({
       result: true,
       latitude: user.address.lat,
