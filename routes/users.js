@@ -69,7 +69,7 @@ router.get("/getUserLocation/:userToken", async (req, res) => {
       return res.json({ result: false, error: "Token is required" });
     }
 
-    const user = await User.findOne({ token: token })
+    const user = await User.findOne({ token: token }).select("-password -_id -username -email -phone");
     
     const populated = await user.populate("address");
 
