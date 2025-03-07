@@ -63,10 +63,10 @@ router.get("/allItems", async (req, res) => {
   try {
     const items = await Item.find().populate("createdBy", "token address -_id");
 
-    if (items.length === 0 ){
-      res.json({result: false, items: "no items found"})
+    if (items.length === 0) {
+      res.json({ result: false, items: "no items found" })
     }
-    
+
     res.json({ result: true, items });
   } catch (error) {
     res.status(500).json({ result: false, error: error.message });
@@ -77,14 +77,19 @@ router.get("/allItems", async (req, res) => {
 router.get("/byUser/:userToken", async (req, res) => {
   try {
     const userToken = req.params.userToken;
+
     // Rechercher l'utilisateur à partir de son token
     const user = await User.findOne({ token: userToken });
 
     // Récupérer les items créés par cet utilisateur
-
     const items = await Item.find({ createdBy: user._id });
+    
+    if (items.length === 0) {
+      res.json({ result: false, items: "no item found" })
+    } else {
+      res.json({ result: true, items });
+    }
 
-    res.json({ result: true, items });
   } catch (error) {
     res.status(500).json({ result: false, error: error.message });
   }
