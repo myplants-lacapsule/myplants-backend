@@ -1,12 +1,12 @@
 const mongoose = require('mongoose');
 
 const addressSchema = mongoose.Schema({
-    street: String,
-    city: String,
-    postalCode: Number,
-    country: String,
-    long: Number,
-    lat: Number,
+    street: { type: String, default: null },
+    city: { type: String, default: null },
+    postalCode: { type: Number, default: null },
+    country: { type: String, default: null },
+    long: { type: Number, default: null },
+    lat: { type: Number, default: null },
   });
 
 const usersSchema = mongoose.Schema({
@@ -15,7 +15,7 @@ const usersSchema = mongoose.Schema({
     password: String,
     phone: { type: String, default: null },
     token: String,
-    address: addressSchema
+    address: addressSchema || null,
 });
 
 const User = mongoose.model('users', usersSchema);
