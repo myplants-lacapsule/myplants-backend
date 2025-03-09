@@ -43,6 +43,7 @@ router.post('/newPlant/:userToken', async (req, res) => {
             name: req.body.name,
             description: req.body.description,
             wateringFrequency: req.body.wateringFrequency,
+            isWatered: false,
             cuisine: req.body.cuisine,
             toxicity: req.body.toxicity,
             seasonality: req.body.seasonality,
@@ -76,10 +77,24 @@ router.get('/:userToken', async (req, res) => {
 
         if (plants.length === 0) {
             return res.json({ result: false, error: 'No plant found' });
+        } else {
+
+            const dDay = new Date(Date.now());
+
+            const plantsWithWaterStatus = plants.map((plant) => {
+                const lastWatering = new Date(plant.lastWatering);
+                const wateringFrequency = plant.wateringFrequency;
+                const daysSinceLastWatering = Math.floor((dDay - lastWatering) / 86400000); // Conversion millisecs en jours
+                const isPlantNeedsWater = daysSinceLastWatering >= wateringFrequency;
+
+                // Ajouter le champ isWatered pour le renvoyer au front
+                return {
+                    ...plant.toObject(),
+                    isWatered: !isPlantNeedsWater // true si la plante a besoin d'arrosage
+                };
+            });
+            res.json({ result: true, data: plantsWithWaterStatus });
         }
-
-        res.json({ result: true, data: plants })
-
     } catch (error) {
         console.error('Error creating new plant:', error);
         res.status(500).json({ result: false, error: 'Internal Server Error' });
@@ -90,12 +105,12 @@ router.get('/:userToken', async (req, res) => {
 router.delete('/deletePlant/:plantToken', async (req, res) => {
 
     try {
-        const plantDeleted = await Plant.deleteOne({token : req.params.plantToken})
+        const plantDeleted = await Plant.deleteOne({ token: req.params.plantToken })
 
-        if (plantDeleted.deletedCount === 1){
-            res.json({result : true, info: "plant deleted"})
-        } else{
-            res.json({ result : false, error: "plant not deleted"})
+        if (plantDeleted.deletedCount === 1) {
+            res.json({ result: true, info: "plant deleted" })
+        } else {
+            res.json({ result: false, error: "plant not deleted" })
         }
 
     } catch (error) {
