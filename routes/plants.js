@@ -122,7 +122,6 @@ router.delete('/deletePlant/:plantToken', async (req, res) => {
 router.put('/updateLastWatering/:plantToken', async (req, res) => {
     try {
         const updateLastWatering = await Plant.updateOne({ token: req.params.plantToken }, { lastWatering: new Date(Date.now()) })
-        console.log(updateLastWatering)
 
         if (updateLastWatering.modifiedCount === 1) {
             const data = await Plant.findOne({token: req.params.plantToken})
