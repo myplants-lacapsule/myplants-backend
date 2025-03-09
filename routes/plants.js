@@ -124,6 +124,10 @@ router.put('/updateLastWatering/:plantToken', async (req, res) => {
 
         const plantToken = req.params.plantToken
 
+        if (!plantToken) {
+            return res.status(400).json({ result: false, error: "Plant token is required" });
+        }
+
         const updateLastWatering = await Plant.updateOne({ token: plantToken }, { lastWatering: new Date() })
 
         if (updateLastWatering.modifiedCount === 1) {
