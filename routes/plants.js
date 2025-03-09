@@ -121,15 +121,15 @@ router.delete('/deletePlant/:plantToken', async (req, res) => {
 
 router.put('/updateLastWatering/:plantToken', async (req, res) => {
     try {
-        const updateLastWatering = await Plant.updateOne({ token: req.params.plantToken }, { lastWatering: new Date(Date.now()) })
+
+        const plantToken = req.params.plantToken
+
+        const updateLastWatering = await Plant.updateOne({ token: plantToken }, { lastWatering: new Date() })
 
         if (updateLastWatering.modifiedCount === 1) {
-            const data = await Plant.findOne({token: req.params.plantToken})
-            if (data){
-                res.json({result: true, lastWatering: data.lastWatering})
-            }
+            res.json({ result: true, lastWatering: new Date() })
         } else {
-            res.json({ result: false, error: "error d'uptate" })
+            res.json({ result: false, error: "Error updating the plant's last watering date" })
         }
 
     } catch (error) {
