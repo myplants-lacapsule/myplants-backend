@@ -81,19 +81,25 @@ router.get('/:userToken', async (req, res) => {
 
             const dDay = new Date(Date.now());
 
+            let numberPlantNeedsWater = 0;
+
             const plantsWithWaterStatus = plants.map((plant) => {
                 const lastWatering = new Date(plant.lastWatering);
                 const wateringFrequency = plant.wateringFrequency;
                 const daysSinceLastWatering = Math.floor((dDay - lastWatering) / 86400000); // Conversion millisecs en jours
                 const isPlantNeedsWater = daysSinceLastWatering >= wateringFrequency;
-
+                
+                if (isPlantNeedsWater){
+                    numberPlantNeedsWater += 1
+                }
+                
                 // Ajouter le champ isWatered pour le renvoyer au front
                 return {
                     ...plant.toObject(),
-                    isWatered: !isPlantNeedsWater // true si la plante a besoin d'arrosage
+                    isWatered: !isPlantNeedsWater, // true si la plante a besoin d'arrosage
                 };
             });
-            res.json({ result: true, data: plantsWithWaterStatus });
+            res.json({ result: true, data: plantsWithWaterStatus, numberPlantNeedsWater: numberPlantNeedsWater });
         }
     } catch (error) {
         console.error('Error creating new plant:', error);
