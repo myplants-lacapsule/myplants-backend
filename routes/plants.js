@@ -89,10 +89,8 @@ router.get('/:userToken', async (req, res) => {
                 const daysSinceLastWatering = Math.floor((dDay - lastWatering) / 86400000); // Conversion millisecs en jours
                 const isPlantNeedsWater = daysSinceLastWatering >= wateringFrequency;
                 
-                if (isPlantNeedsWater){
-                    numberPlantNeedsWater += 1
-                }
-                
+                isPlantNeedsWater && (numberPlantNeedsWater += 1)
+
                 // Ajouter le champ isWatered pour le renvoyer au front
                 return {
                     ...plant.toObject(),
