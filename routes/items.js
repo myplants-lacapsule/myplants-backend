@@ -82,7 +82,7 @@ router.get("/byUser/:userToken", async (req, res) => {
     const user = await User.findOne({ token: userToken });
 
     // Récupérer les items créés par cet utilisateur
-    const items = await Item.find({ createdBy: user._id });
+    const items = await Item.find({ createdBy: user._id }).populate({path : "createdBy", select: "username email -_id"});
     
     if (items.length === 0) {
       res.json({ result: false, items: "no item found" })
