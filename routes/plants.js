@@ -123,6 +123,7 @@ router.delete('/deletePlant/:plantToken', async (req, res) => {
     }
 })
 
+// route pour update la date du dernier arrosage
 router.put('/updateLastWatering/:plantToken', async (req, res) => {
     try {
 
