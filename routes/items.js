@@ -86,7 +86,8 @@ router.get("/byUser/:userToken", async (req, res) => {
     const user = await User.findOne({ token: userToken });
 
     // Récupérer les items créés par cet utilisateur
-    const items = await Item.find({ createdBy: user._id }).populate({ path: "createdBy", select: "username email -_id" });
+    const items = await Item.find({ createdBy: user._id })
+      .populate({ path: "createdBy", select: "username email token -_id" });
 
     if (items.length === 0) {
       res.json({ result: false, items: "no item found" })
@@ -107,11 +108,9 @@ router.delete("/deleteItem/:itemToken", async (req, res) => {
       return res.status(400).json({ result: false, error: "Item token is required" });
     }
 
-    const deletedPlant = await Item.deleteOne({ token: itemToken })
+    const deletedItem = await Item.deleteOne({ token: itemToken })
 
-    console.log("deteledPlant", deletedPlant)
-
-    if (deletedPlant.deletedCount === 1) {
+    if (deletedItem.deletedCount === 1) {
       res.json({ result: true, info: "Item deleted" })
     } else {
       res.json({ result: false, error: "Error deleting item" })
