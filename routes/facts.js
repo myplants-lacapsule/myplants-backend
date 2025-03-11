@@ -7,7 +7,7 @@ const Fact = require("../models/facts");
 router.get('/', async (req, res) => {
     try {
 
-        const data = await Fact.find()
+        const data = await Fact.find().select("-_id")
 
         const factsLength = data.length
         const number = Math.floor(Math.random() * factsLength)
