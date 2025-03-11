@@ -76,7 +76,11 @@ router.get("/allItems", async (req, res) => {
 // Route pour récupérer les items d'un utilisateur en particulier
 router.get("/byUser/:userToken", async (req, res) => {
   try {
+
     const userToken = req.params.userToken;
+    if (!userToken) {
+      return res.status(400).json({ result: false, error: "User token is required" });
+    }
 
     // Rechercher l'utilisateur à partir de son token
     const user = await User.findOne({ token: userToken });
