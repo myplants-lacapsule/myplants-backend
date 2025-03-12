@@ -4,11 +4,9 @@ var router = express.Router();
 require("../models/connection");
 const Fact = require("../models/facts");
 
+// route get pour afficher 1 fact aléatoirement
 router.get('/', async (req, res) => {
     try {
-
-        // requête pour afficher la dernière fact avec la date la plus lointaine
-        // const latestFact = await Fact.findOne().select("-_id").sort({lastDisplayed : +1})
 
         const randomFact = await Fact.find().select("-_id")
 
@@ -18,7 +16,7 @@ router.get('/', async (req, res) => {
         if (randomFact.length === 0 || factsLength < number ) {
             return res.json({ result: false, error: "no facts found" })
         }
-        
+
         res.json({ result: true, data: randomFact[number] })
 
     } catch (error) {

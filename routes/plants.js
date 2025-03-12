@@ -6,6 +6,8 @@ const cloudinary = require('cloudinary').v2;
 const fs = require('fs');
 const uid2 = require("uid2");
 
+const { checkBody } = require("../modules/checkBody");
+
 const User = require("../models/users");
 const Plant = require("../models/plants")
 
@@ -28,9 +30,10 @@ router.post('/upload', async (req, res) => {
 router.post('/newPlant/:userToken', async (req, res) => {
     try {
         // Vérification des champs requis
-        // if (!req.body.name || !req.body.description || !req.body.wateringFrequency || !req.body.cuisine || !req.body.toxicity || !req.body.seasonality || !req.body.sunExposure || !req.body.photo) {
-        //     return res.json({ result: false, error: "champs manquants" })
-        // }
+        if (!checkBody(req.body, ["name", "description", "wateringFrequency", "cuisine", "toxicity", "seasonality", "sunExposure", "photo"])) {
+            res.json({ result: false, error: "Missing or empty fields" });
+            return;
+        }
 
         // Recherche de l'utilisateur par token
         const user = await User.findOne({ token: req.params.userToken });
@@ -64,11 +67,17 @@ router.post('/newPlant/:userToken', async (req, res) => {
     }
 });
 
-
-// route get pour récupérer toutes les plantes d'un user
+// Route get pour récupérer toutes les plantes d'un user
 router.get('/:userToken', async (req, res) => {
     try {
-        const user = await User.findOne({ token: req.params.userToken })
+
+        const userToken = req.params.userToken
+
+        if (!userToken) {
+            return res.status(400).json({ result: false, error: "User token is required" });
+        }
+
+        const user = await User.findOne({ token: userToken })
         if (!user) {
             return res.status(404).json({ result: false, error: 'User not found' });
         }
@@ -79,24 +88,26 @@ router.get('/:userToken', async (req, res) => {
             return res.json({ result: false, error: 'No plant found' });
         } else {
 
-            const dDay = new Date(Date.now());
+            const dDay = new Date(Date.now()); // initialisation de la date du jour
 
-            let numberPlantNeedsWater = 0;
+            let numberPlantNeedsWater = 0; // par défaut, pas de plante à arroser
 
             const plantsWithWaterStatus = plants.map((plant) => {
-                const lastWatering = new Date(plant.lastWatering);
+                const lastWatering = new Date(plant.lastWatering);  // conversion en date de lastWatering
                 const wateringFrequency = plant.wateringFrequency;
-                const daysSinceLastWatering = Math.floor((dDay - lastWatering) / 86400000); // Conversion millisecs en jours
-                const isPlantNeedsWater = daysSinceLastWatering >= wateringFrequency;
-                
-                isPlantNeedsWater && (numberPlantNeedsWater += 1)
+                const daysSinceLastWatering = Math.floor((dDay - lastWatering) / 86400000); // Obtenir le nombre de jours depuis le dernier arrosage
+                const isPlantNeedsWater = daysSinceLastWatering >= wateringFrequency; // Si temps d'arrosage dépassé
 
-                // Ajouter le champ isWatered pour le renvoyer au front
+                isPlantNeedsWater && (numberPlantNeedsWater += 1) // Alors +1 au compteur nombre de plantes qui ont besoin d'arrosage
+
+                // Ajouter le champ isWatered à chaque plante pour le renvoyer au front
                 return {
                     ...plant.toObject(),
                     isWatered: !isPlantNeedsWater, // true si la plante a besoin d'arrosage
                 };
             });
+
+            // Renvoi des données et du nombre de plantes qui ont besoin d'être arrosées
             res.json({ result: true, data: plantsWithWaterStatus, numberPlantNeedsWater: numberPlantNeedsWater });
         }
     } catch (error) {
@@ -105,11 +116,17 @@ router.get('/:userToken', async (req, res) => {
     }
 })
 
-// route pour delete une plante
+// Route pour delete une plante de l'inventaire
 router.delete('/deletePlant/:plantToken', async (req, res) => {
-
     try {
-        const plantDeleted = await Plant.deleteOne({ token: req.params.plantToken })
+
+        const plantToken = req.params.plantToken
+
+        if (!plantToken) {
+            return res.status(400).json({ result: false, error: "Plant token is required" });
+        }
+
+        const plantDeleted = await Plant.deleteOne({ token: plantToken })
 
         if (plantDeleted.deletedCount === 1) {
             res.json({ result: true, info: "plant deleted" })

@@ -7,16 +7,16 @@ const { checkBody } = require("../modules/checkBody");
 const uid2 = require("uid2");
 const bcrypt = require("bcrypt");
 
-router.post("/signup", (req, res) => {
-  if (!checkBody(req.body, ["username", "email", "password"])) {
-    res.json({ result: false, error: "Missing or empty fields" });
-    return;
-  }
+// route signup
+router.post("/signup", async (req, res) => {
+  try {
+    if (!checkBody(req.body, ["username", "email", "password"])) {
+      return res.status(400).json({ result: false, error: "Missing or empty fields" });
+    }
+    // Vérification si le user n'est pas déjà enregistré
+    const findUser = await User.findOne({ email: req.body.email })
 
-  // Check if the user has not already been registered
-  User.findOne({ email: req.body.email }).then((data) => {
-
-    if (data === null) {
+    if (findUser === null) {
       const hash = bcrypt.hashSync(req.body.password, 10);
 
       const newUser = new User({
@@ -35,74 +35,60 @@ router.post("/signup", (req, res) => {
         }
       });
 
-      newUser.save().then((newDoc) => {
-        res.json({ result: true, token: newDoc.token, username: newDoc.username });
-      });
+      const newDoc = await newUser.save() // save de l'user
+
+      // renvoi au front le username et le token
+      res.json({ result: true, token: newDoc.token, username: newDoc.username });
+
     } else {
-      // User already exists in database
+      // User existe déjà
       res.json({ result: false, error: "User already exists" });
     }
-  });
-});
 
-router.post("/signin", (req, res) => {
-  if (!checkBody(req.body, ["email", "password"])) {
-    res.json({ result: false, error: "Missing or empty fields" });
-    return;
-  }
-
-  User.findOne({ email: req.body.email }).then((data) => {
-    if (data && bcrypt.compareSync(req.body.password, data.password)) {
-      res.json({ result: true, token: data.token, username: data.username });
-    } else {
-      res.json({ result: false, error: "User not found or wrong password" });
-    }
-  });
-});
-
-router.put('/logout/:userToken', async (req, res) => {
-
-  try {
-    const token = req.params.userToken
-    if (!token) {
-      return res.json({ result: false, error: "Token is required" })
-    }
-
-    const userFound = await User.findOne({ token: token })
-    console.log(userFound)
-
-    const modifyToken = await User.updateOne({ _id: userFound._id}, {token: null })
-
-    console.log(modifyToken)
-
-    if (modifyToken.modifiedCount === 1) {
-      res.json({ result: true, info: "token user deleted" })
-    } else {
-      res.json({ result: false })
-
-    }
-    // console.log("response ", response)
   } catch (error) {
-    res.status(500).json({ result: false, error: error.message });
+    console.error(error);
+    res.status(500).json({ result: false, error: "Internal Server Error" });
   }
-})
 
+});
 
-router.get("/getUserLocation/:userToken", async (req, res) => {
+// route signin
+router.post("/signin", async (req, res) => {
+
   try {
-    const token = req.params.userToken;
-    if (!token) {
-      return res.json({ result: false, error: "Token is required" });
+    if (!checkBody(req.body, ["email", "password"])) {
+      return res.status(400).json({ result: false, error: "Missing or empty fields" });
     }
 
-    const user = await User.findOne({ token: token }).select("-password -_id -username -email -phone");
+    const findUser = await User.findOne({ email: req.body.email }) // recherche de l'email
 
-    const populated = await user.populate("address");
-
-    if (!user) {
-      return res.json({ result: false, error: "User not found" });
+    // comparaison des password avec bcrypt
+    if (findUser && await bcrypt.compareSync(req.body.password, findUser.password)) {
+      return res.json({ result: true, token: findUser.token, username: findUser.username });
+    } else {
+      return res.json({ result: false, error: "User not found or wrong password" });
     }
 
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ result: false, error: "Internal Server Error" });
+  }
+});
+
+// route pour avoir la localisation d'un user
+router.get("/getUserLocation/:userToken", async (req, res) => {
+
+  try {
+    const userToken = req.params.userToken;
+
+    const user = await User.findOne({ token: userToken }).select("address -_id");
+
+    // renvoie false si pas d'adresse
+    if (!user || !user.address) {
+      return res.json({ result: false, error: "User not found or address not available" });
+    }
+
+    // renvoie de la localisation 
     res.json({
       result: true,
       latitude: user.address.lat,
@@ -113,6 +99,7 @@ router.get("/getUserLocation/:userToken", async (req, res) => {
   }
 });
 
+// update la localisation
 router.post("/updateLocation", async (req, res) => {
   try {
     const { token, street, city, postalCode } = req.body;
@@ -120,6 +107,7 @@ router.post("/updateLocation", async (req, res) => {
       return res.json({ result: false, error: "Missing required fields" });
     }
 
+    // fetch à l'api gouv pour récupéréer la latitude/longitude
     const response = await fetch(`https://api-adresse.data.gouv.fr/search/?q=${street}&postcode=${postalCode}&limit=1`);
     if (!response.ok) {
       throw new Error("Erreur lors du géocodage");
@@ -129,7 +117,6 @@ router.post("/updateLocation", async (req, res) => {
     if (data.features && data.features.length > 0) {
       [longitude, latitude] = data.features[0].geometry.coordinates;
     }
-
 
     const user = await User.findOne({ token });
     if (!user) {
@@ -146,11 +133,39 @@ router.post("/updateLocation", async (req, res) => {
     };
 
     await user.save();
+
     res.json({ result: true });
+    
   } catch (error) {
     res.status(500).json({ result: false, error: error.message });
   }
 });
+
+// route logout non utilisée
+// router.put('/logout/:userToken', async (req, res) => {
+
+//   try {
+//     const token = req.params.userToken
+
+//     if (!token) {
+//       return res.json({ result: false, error: "Token is required" })
+//     }
+
+//     const userFound = await User.findOne({ token: token })
+
+//     const modifyToken = await User.updateOne({ _id: userFound._id }, { token: null })
+
+//     if (modifyToken.modifiedCount === 1) {
+//       res.json({ result: true, info: "token user deleted" })
+//     } else {
+//       res.json({ result: false })
+
+//     }
+//     // console.log("response ", response)
+//   } catch (error) {
+//     res.status(500).json({ result: false, error: error.message });
+//   }
+// })
 
 
 module.exports = router;
