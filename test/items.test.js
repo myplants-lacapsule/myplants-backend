@@ -9,34 +9,29 @@ it("GET /allItems", async () => {
   expect(res.body.result).toBe(true);
 });
 
-
 // Test pour tester la route pour récupérer les items d'un utilisateur qui n'a pas d'items
+it("GET /byUser/:userToken", async () => {
+  const res = await request(app).get("/items/byUser/0EXfGPbIltNthtCs6K-Pi41Qrd_72Glp");
 
-it ("GET /byUser/:userToken", async () => {
-  const res = await request(app).get(
-    "/items/byUser/0EXfGPbIltNthtCs6K-Pi41Qrd_72Glp"
-  );
- 
   expect(res.statusCode).toBe(200);
   expect(res.body.result).toBe(true);
-  expect(res.body.items).toEqual([]);});
-
+  expect(res.body.items).toEqual([]);
+});
 
 // Test pour tester la route pour créer un item
 it("POST /newItem/:userToken", async () => {
   const res = await request(app)
     .post("/items/newItem/Ali0crEEb9OcPONkw8afGsoivaocegEM")
-    .field({   
-        title: "Test plant",
-        description: "This is a test plant",
-        price: 20,
-        height: 50,
-        condition: "Good",
-        isPlant: true,
-        isGiven: false,
-        })
+    .field({
+      title: "Test plant",
+      description: "This is a test plant",
+      price: 20,
+      height: 50,
+      condition: "Good",
+      isPlant: true,
+      isGiven: false,
+    })
     .attach("photoFromFront", "test/test.jpg");
-    
 
   expect(res.statusCode).toBe(200);
   expect(res.body.result).toBe(true);
@@ -50,6 +45,3 @@ it("POST /newItem/:userToken", async () => {
   expect(res.body.item.photo.length).toBe(1);
   expect(res.body.item.photo[0]).toContain("cloudinary.com");
 });
-
-
-
