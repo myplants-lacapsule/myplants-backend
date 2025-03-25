@@ -13,7 +13,7 @@ const Plant = require("../models/plants");
 
 // Upload photo sur cloudinary
 router.post("/upload", async (req, res) => {
-  const photoPath = `./tmp/${uniqid()}.jpg`;
+  const photoPath = `../tmp/${uniqid()}.jpg`;
   const resultMove = await req.files.photoFromFront.mv(photoPath);
 
   if (!resultMove) {

@@ -16,7 +16,7 @@ router.post("/newItem/:userToken", async (req, res) => {
   const userToken = req.params.userToken;
 
   // Envoyer le fichier sur Cloudinary
-  const photoPath = `./tmp/${uniqid()}.jpg`;
+  const photoPath = `../tmp/${uniqid()}.jpg`;
   const resultMove = await req.files.photoFromFront.mv(photoPath);
   let photoUrl = "";
 
