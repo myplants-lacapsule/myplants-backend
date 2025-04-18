@@ -34,7 +34,7 @@ myPlants est une application conçue pour aider les utilisateurs à gérer facil
 - Recherche et ajout de plantes via deux API
 - Reconnaissance photo
 - Rappels d'arrosage
-- Carte intéractive permettant la revente et le don de plantes.
+- Carte interactive permettant la revente et le don de plantes.
 
 ---
 
